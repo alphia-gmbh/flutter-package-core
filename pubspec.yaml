@@ -1,0 +1,56 @@
+# Copyright 2024 Alphia GmbH
+name: alphia_core
+description: 'Alphia Core is a lightweight Flutter package built by Alphia GmbH. It contains shared logic used across our own apps, focusing only on the essentials and nothing more.'
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.8.1
+  flutter: ^1.17.0
+
+dependencies:
+  cloud_functions: ^5.0.1
+  firebase_auth: ^5.1.0
+  firebase_crashlytics: ^4.0.1
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  google_sign_in: ^7.1.0
+  intl: any
+  material_symbols_icons: ^4.2801.0
+  url_launcher: ^6.1.6
+  webview_flutter: ^4.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  generate: true
+  assets:
+    - assets/
+      # font-inter-medium.ttf
+      # font-inter-regular.ttf
+      # font-intertight-medium.ttf
+      # font-intertight-regular.ttf
+      # font-trainone.ttf
+      # google-logo.png
+  fonts:
+    - family: InterTight
+      fonts:
+        - asset: assets/font-intertight-regular.ttf
+          weight: 400
+        - asset: assets/font-intertight-medium.ttf
+          weight: 500
+    - family: Inter
+      fonts:
+        - asset: assets/font-inter-regular.ttf
+          weight: 400
+        - asset: assets/font-inter-medium.ttf
+          weight: 500
+    - family: TrainOne
+      fonts:
+        - asset: assets/font-trainone.ttf
