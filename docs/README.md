@@ -2,7 +2,7 @@
 
 **Alphia Core** is a lightweight Flutter package built by [Alphia](https://www.alphia.io). It contains shared logic used across our own apps, focusing only on the essentials and nothing more.
 
-We’re sharing this package as part of our commitment to openness and transparency. While it’s not designed for general use, we hope it can still offer value or inspiration to others exploring similar challenges.
+We’re sharing this package as part of our commitment to openness and transparency. While not built for wide collaboration, we hope it can still offer value or inspiration to others exploring similar challenges.
 
 ## Main Features
 - High-level abstraction of federated user authentication and sign-in
@@ -17,7 +17,7 @@ This project is maintained on an **as-needed basis** and follows the pace of our
 
 ## Community & Contributions
 
-We try to support our open source projects where we can, and at the same time our core work is commercial. If you’re looking for a partner to help with consulting, architecture, or building complete digital products, we offer these as paid services. Just get in touch at [hello@alphia.io](mailto:hello@alphia.io)
+We try to support our open source projects where we can, and at the same time our core work is commercial. If you’re looking for a partner to help with consulting, solution architecture, or building complete digital products, we offer these as paid services. Just get in touch at [hello@alphia.io](mailto:hello@alphia.io)
 
 Commits and pull requests are not being accepted at the moment. Bug reports are welcome. Feature requests are only considered if they clearly align with our long-term product vision.
 
