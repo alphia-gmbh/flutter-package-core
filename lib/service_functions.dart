@@ -1,13 +1,13 @@
 // Copyright 2024 Alphia GmbH
-import 'dart:async' show Timer;
-import 'dart:math' show Random, min;
+import 'dart:async';
+import 'dart:math';
 import 'package:flutter/cupertino.dart' show CupertinoAlertDialog, CupertinoDialogAction, showCupertinoDialog;
-import 'package:flutter/material.dart' show ValueNotifier, Widget, BuildContext, TextStyle, BoxConstraints, EdgeInsets, PopScope, RoundedRectangleBorder, TargetPlatform, Theme, Text, Navigator, FontFeature, ValueListenableBuilder, ConstrainedBox, VerticalDirection, TextButton, AlertDialog, SingleChildScrollView, LayoutBuilder, ScaffoldMessenger, MediaQuery, Orientation, SnackBarBehavior, BorderRadius, Radius, Alignment, TextAlign, Align, SnackBarAction, SnackBar, showDialog;
-import 'package:flutter/services.dart' show HapticFeedback, PlatformException;
-import 'package:url_launcher/url_launcher.dart' show launchUrl;
-import 'crossplatform_io.dart' if (dart.library.js_interop) 'crossplatform_web.dart' show CorePlatform;
-import 'service_theme.dart' show CoreTheme;
-import 'service_widgets.dart' show CoreInstance, CoreProgressIndicator;
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'crossplatform_io.dart' if (dart.library.js_interop) 'crossplatform_web.dart';
+import 'service_theme.dart';
+import 'service_widgets.dart';
 
 
 /// Draft email with [address], [subject] and [body].
@@ -32,23 +32,25 @@ String coreGenerateId({int length=20, bool aA0=true}) {
 
 
 /// Get time ago from [dateTime] to now.
-String coreCalcTimeAgo({required DateTime ago, DateTime? now}) {
+String coreCalcTimeAgo({required DateTime ago, DateTime? now, bool capitalized=false}) {
   now ??= DateTime.now();
   final difference = now.difference(ago);
+  String timeAgo = '';
   if (difference.inMinutes < 60) {
-    return CoreInstance.text.durationMinutesAgo(difference.inMinutes);
+    timeAgo = CoreInstance.text.durationMinutesAgo(difference.inMinutes);
   } else if (difference.inHours < 24) {
-    return CoreInstance.text.durationHoursAgo(difference.inHours);
+    timeAgo = CoreInstance.text.durationHoursAgo(difference.inHours);
   } else if (difference.inDays < 7) {
-    return CoreInstance.text.durationDaysAgo(difference.inDays, ago);
+    timeAgo = CoreInstance.text.durationDaysAgo(difference.inDays, ago);
   } else {
-    return CoreInstance.text.durationYearsAgo((ago.year == now.year).toString(), ago, ago, ago);
+    timeAgo = CoreInstance.text.durationYearsAgo(capitalized.toString(), (ago.year == now.year).toString(), ago, ago, ago);
   }
+  return (capitalized && (timeAgo.isNotEmpty)) ? '${timeAgo[0].toUpperCase()}${timeAgo.substring(1)}' : timeAgo;
 }
 
 
 /// Show dialog with [title] and [content] and optional [leftButton] and required [rightButton]. [isError] changes color to errorContainer. [hasTimer] adds countdown timer to rightButton.
-Future<bool?> coreShowDialog({required String title, required String content, Widget? contentWidget, String? leftButton, required String rightButton, List<String>? buttonLabels, List<void Function()?>? buttonFunctions, bool isError=false, bool hasTimer=false}) {
+Future<bool?> coreShowDialog({required String title, String? content, Widget? contentWidget, String? leftButton, required String rightButton, List<String>? buttonLabels, List<void Function()?>? buttonFunctions, bool isError=false, bool hasTimer=false}) {
 
   if (isError) HapticFeedback.lightImpact();
   final timerNotifier = ValueNotifier<int>(0);
@@ -64,7 +66,7 @@ Future<bool?> coreShowDialog({required String title, required String content, Wi
       builder: (BuildContext context) {
         return CupertinoAlertDialog(
           title: Text(title),
-          content: contentWidget ?? Text(content),
+          content: contentWidget ?? ((content != null) ? Text(content) : null),
           actions: <Widget>[
             if (leftButton != null)
               CupertinoDialogAction(
@@ -115,7 +117,7 @@ Future<bool?> coreShowDialog({required String title, required String content, Wi
                   title: Text(title),
                   content: ConstrainedBox( // ConstrainedBox necessary to limit maxWidth, CupertinoAlertDialog is limited by default
                     constraints: const BoxConstraints(maxWidth: CoreTheme.maxWidth - 48 - (CoreTheme.padding *2)), // AlertDialog default content padding 48
-                    child: contentWidget ?? Text(content),
+                    child: contentWidget ?? ((content != null) ? Text(content) : null),
                   ),
                   backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
                   actionsOverflowDirection: VerticalDirection.up, // Apple guidelines // Place the button people are most likely to choose on the trailing side in a row of buttons or at the top in a stack of buttons. Always place the default button on the trailing side of a row or at the top of a stack. Cancel buttons are typically on the leading side of a row or at the bottom of a stack.
@@ -213,13 +215,13 @@ void coreShowSnackbar({required String content, String? actionLabel, void Functi
   assert((actionLabel == null && actionFunction == null) || (actionLabel != null && actionFunction != null), 'errorCode voice');
   final context = CoreInstance.context;
   if (clearSnackbars) ScaffoldMessenger.of(context).clearSnackBars();
-  final isFixed = CorePlatform.isIOS && ((MediaQuery.of(context).size.width - (CoreTheme.padding *4)) < (CoreTheme.maxWidth - (CoreTheme.padding *2)));
-  final iOSWorkaround = CorePlatform.isIOS && (MediaQuery.of(context).orientation == Orientation.landscape); // Workaround centering for iOS landscape orientation
+  final isFixed = CorePlatform.isIOS && ((MediaQuery.widthOf(context) - (CoreTheme.padding *4)) < (CoreTheme.maxWidth - (CoreTheme.padding *2)));
+  final iOSWorkaround = CorePlatform.isIOS && (MediaQuery.orientationOf(context) == Orientation.landscape); // Workaround centering for iOS landscape orientation
     ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
       behavior: isFixed ? SnackBarBehavior.fixed : SnackBarBehavior.floating,
-      width: (isFixed || iOSWorkaround) ? null : min(MediaQuery.of(context).size.width - (CoreTheme.padding *4), CoreTheme.maxWidth - (CoreTheme.padding *2)),
-      margin: iOSWorkaround ? EdgeInsets.symmetric(horizontal: (MediaQuery.of(context).size.width - MediaQuery.of(context).padding.horizontal - min(MediaQuery.of(context).size.width - (CoreTheme.padding *4), CoreTheme.maxWidth - (CoreTheme.padding *2))) /2) : null,
+      width: (isFixed || iOSWorkaround) ? null : min(MediaQuery.widthOf(context) - (CoreTheme.padding *4), CoreTheme.maxWidth - (CoreTheme.padding *2)),
+      margin: iOSWorkaround ? EdgeInsets.symmetric(horizontal: (MediaQuery.widthOf(context) - MediaQuery.paddingOf(context).horizontal - min(MediaQuery.widthOf(context) - (CoreTheme.padding *4), CoreTheme.maxWidth - (CoreTheme.padding *2))) /2) : null,
       actionOverflowThreshold: 0.62, // The percentage threshold for action widget's width before it overflows to a new line.
       shape: isFixed ? const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(CoreTheme.innerRadius))) : RoundedRectangleBorder(borderRadius: BorderRadius.circular(CoreTheme.innerRadius)),
       content: Align(
@@ -234,6 +236,7 @@ void coreShowSnackbar({required String content, String? actionLabel, void Functi
       ),
       backgroundColor: isError ? Theme.of(context).colorScheme.errorContainer : null,
       duration: const Duration(seconds: 7),
+      persist: false, // Add this line to restore auto-dismiss behavior
       action: ((actionLabel != null) && (actionFunction != null))
         ? SnackBarAction(label: actionLabel, onPressed: actionFunction)
         : null,

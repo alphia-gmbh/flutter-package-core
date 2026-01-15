@@ -63,13 +63,15 @@ import 'app_localizations_en.dart';
 /// property.
 abstract class CoreAppLocalizations {
   CoreAppLocalizations(String locale)
-      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
   static CoreAppLocalizations of(BuildContext context) {
     return Localizations.of<CoreAppLocalizations>(
-        context, CoreAppLocalizations)!;
+      context,
+      CoreAppLocalizations,
+    )!;
   }
 
   static const LocalizationsDelegate<CoreAppLocalizations> delegate =
@@ -87,18 +89,18 @@ abstract class CoreAppLocalizations {
   /// of delegates is preferred or required.
   static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
       <LocalizationsDelegate<dynamic>>[
-    delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-  ];
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
     Locale('en', 'US'),
     Locale('en', 'UK'),
-    Locale('de')
+    Locale('de'),
   ];
 
   /// No description provided for @buttonCancel.
@@ -143,6 +145,12 @@ abstract class CoreAppLocalizations {
   /// **'Download'**
   String get buttonDownload;
 
+  /// No description provided for @buttonDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate'**
+  String get buttonDuplicate;
+
   /// No description provided for @buttonEditDate.
   ///
   /// In en, this message translates to:
@@ -167,6 +175,12 @@ abstract class CoreAppLocalizations {
   /// **'Got it'**
   String get buttonOk;
 
+  /// No description provided for @buttonRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get buttonRemove;
+
   /// No description provided for @buttonSave.
   ///
   /// In en, this message translates to:
@@ -190,6 +204,12 @@ abstract class CoreAppLocalizations {
   /// In en, this message translates to:
   /// **'Undo'**
   String get buttonUndo;
+
+  /// No description provided for @dialogTitleContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue?'**
+  String get dialogTitleContinue;
 
   /// No description provided for @dialogTitleDelete.
   ///
@@ -232,6 +252,12 @@ abstract class CoreAppLocalizations {
   /// In en, this message translates to:
   /// **'Looks like you’re offline. Connect to the internet first and then try again please.'**
   String get dialogContentOffline;
+
+  /// No description provided for @dialogTitleRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove?'**
+  String get dialogTitleRemove;
 
   /// No description provided for @dialogTitleUploaded.
   ///
@@ -410,13 +436,13 @@ abstract class CoreAppLocalizations {
   /// No description provided for @copyright2023.
   ///
   /// In en, this message translates to:
-  /// **'Copyright 2023 Alphia GmbH.\nAll rights reserved.'**
+  /// **'Copyright 2023 Alphia GmbH'**
   String get copyright2023;
 
   /// No description provided for @copyright2024.
   ///
   /// In en, this message translates to:
-  /// **'Copyright 2024 Alphia GmbH.\nAll rights reserved.'**
+  /// **'Copyright 2024 Alphia GmbH'**
   String get copyright2024;
 
   /// No description provided for @dialogTitleNoBrowser.
@@ -548,7 +574,7 @@ abstract class CoreAppLocalizations {
   /// No description provided for @subtitleUpdatePersonal.
   ///
   /// In en, this message translates to:
-  /// **'Change your account email address'**
+  /// **'Change your sign-in method'**
   String get subtitleUpdatePersonal;
 
   /// No description provided for @appBarUpdatePersonal.
@@ -596,7 +622,7 @@ abstract class CoreAppLocalizations {
   /// No description provided for @contentUpdatePersonalSecondStep.
   ///
   /// In en, this message translates to:
-  /// **'Here’s where you get to choose how you want to sign in from now on along with providing your updated email address:'**
+  /// **'Here’s where you get to choose how you want to sign in from now on along with providing your updated user name and email address:'**
   String get contentUpdatePersonalSecondStep;
 
   /// No description provided for @contentUpdatePersonalSecondStepUnlink.
@@ -620,8 +646,8 @@ abstract class CoreAppLocalizations {
   /// No description provided for @dialogContentExportPersonal.
   ///
   /// In en, this message translates to:
-  /// **'A copy of your personal data will be exported as ZIP archive. Your archive will contain an easy-to-read HTML file and a JSON file for potential import into other journaling apps{isAnonymous, select, true{} other{ ({email})}}.\n\nEnsure you keep your files safe and secure, especially when saving or sharing them.'**
-  String dialogContentExportPersonal(String isAnonymous, String email);
+  /// **'A copy of your personal data will be exported as ZIP archive. Your archive contains an easy-to-read HTML file and a JSON file for import into other journaling apps.\n\nPlease ensure you keep your files safe and secure, especially when saving or sharing them.'**
+  String get dialogContentExportPersonal;
 
   /// No description provided for @titleDeleteAccount.
   ///
@@ -638,13 +664,13 @@ abstract class CoreAppLocalizations {
   /// No description provided for @dialogContentDeleteAccount.
   ///
   /// In en, this message translates to:
-  /// **'{isAnonymous, select, true{All your personal data will be permanently deleted.} other{Your user account including all your personal data will be permanently deleted ({email}). Additionally, you will be signed out from all synced devices.\n\nYou may be asked to sign in again before the deletion to verify it’s really you.}}'**
+  /// **'{isAnonymous, select, true{All your personal data will be deleted permanently.} other{Your user account including all your personal data will be deleted permanently ({email}). Additionally, you will be signed out from all synced devices.\n\nYou may be asked to sign in again before the deletion to verify it’s really you.}}'**
   String dialogContentDeleteAccount(String isAnonymous, String email);
 
   /// No description provided for @snackDeleteAccount.
   ///
   /// In en, this message translates to:
-  /// **'{isAnonymous, select, true{App data} other{User account}} permanently deleted'**
+  /// **'{isAnonymous, select, true{App data} other{User account}} deleted permanently'**
   String snackDeleteAccount(String isAnonymous);
 
   /// No description provided for @buttonSignOut.
@@ -704,15 +730,26 @@ abstract class CoreAppLocalizations {
   /// No description provided for @durationYearsAgo.
   ///
   /// In en, this message translates to:
-  /// **'{hideYear, select, true{{date} {time}} other{{dateYear} {time}}}'**
+  /// **'{adposition, select, true{{hideYear, select, true{on {date} {time}} other{on {dateYear} {time}}}} other{{hideYear, select, true{{date} {time}} other{{dateYear} {time}}}}}'**
   String durationYearsAgo(
-      String hideYear, DateTime date, DateTime dateYear, DateTime time);
+    String adposition,
+    String hideYear,
+    DateTime date,
+    DateTime dateYear,
+    DateTime time,
+  );
+
+  /// No description provided for @doubleOneDigit.
+  ///
+  /// In en, this message translates to:
+  /// **'{double}'**
+  String doubleOneDigit(double double);
 
   /// No description provided for @doubleTwoDigits.
   ///
   /// In en, this message translates to:
-  /// **'{doubleTwoDigits}'**
-  String doubleTwoDigits(double doubleTwoDigits);
+  /// **'{double}'**
+  String doubleTwoDigits(double double);
 }
 
 class _CoreAppLocalizationsDelegate
@@ -722,7 +759,8 @@ class _CoreAppLocalizationsDelegate
   @override
   Future<CoreAppLocalizations> load(Locale locale) {
     return SynchronousFuture<CoreAppLocalizations>(
-        lookupCoreAppLocalizations(locale));
+      lookupCoreAppLocalizations(locale),
+    );
   }
 
   @override
@@ -743,8 +781,9 @@ CoreAppLocalizations lookupCoreAppLocalizations(Locale locale) {
   }
 
   throw FlutterError(
-      'CoreAppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-      'an issue with the localizations generation tool. Please file an issue '
-      'on GitHub with a reproducible sample app and the gen-l10n configuration '
-      'that was used.');
+    'CoreAppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localizations generation tool. Please file an issue '
+    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+    'that was used.',
+  );
 }

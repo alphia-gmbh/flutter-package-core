@@ -1,5 +1,5 @@
 // Copyright 2024 Alphia GmbH
-import 'package:flutter/material.dart' show AppBarTheme, BorderRadius, Brightness, BuildContext, Color, ColorScheme, DataTableThemeData, EdgeInsets, ListTileThemeData, MouseCursor, ProgressIndicatorThemeData, RoundedRectangleBorder, SliderThemeData, SnackBarThemeData, SystemMouseCursors, TextTheme, Theme, ThemeData, TooltipThemeData, VisualDensity, WidgetState, WidgetStateProperty;
+import 'package:flutter/material.dart';
 
 // Rewrite int colors to hex colors
 // perl -i -pe 's/Color\((\d+)\)/"Color(0x".sprintf("%08X", $1).")"/ge' lib/service_theme.dart
@@ -15,8 +15,8 @@ class CoreTheme {
   static const double radius = 28; // 24;
   static const double innerRadius = 12; // 14; // Smaller inner radius for text field and snackbar // Outer radius - padding = inner radius
 
-  ThemeData get light => _themeData(_lightColorScheme);
-  ThemeData get dark => _themeData(_darkColorScheme);
+  ThemeData get light => _themeData(lightColorScheme);
+  ThemeData get dark => _themeData(darkColorScheme);
 
   TextTheme _textTheme() {
     final displayTextTheme = Theme.of(context).textTheme.apply(fontFamily: 'InterTight', package: 'alphia_core');
@@ -33,19 +33,30 @@ class CoreTheme {
 
   ThemeData _themeData(ColorScheme colorScheme) {
     return ThemeData(
-      useMaterial3: true,
+      colorScheme: colorScheme,
       textTheme: _textTheme().apply(
         displayColor: colorScheme.onSurface,
         bodyColor: colorScheme.onSurface,
       ),
-      colorScheme: colorScheme,
+      useMaterial3: true,
+
       appBarTheme: const AppBarTheme(
         centerTitle: true,
       ),
-      iconTheme: Theme.of(context).iconTheme.copyWith(weight: 500), // copyWith necessary to avoid color issues
+      iconButtonTheme: IconButtonThemeData(
+        style: const ButtonStyle(tapTargetSize: MaterialTapTargetSize.padded),
+      ),
       listTileTheme: ListTileThemeData(
         contentPadding: const EdgeInsets.symmetric(horizontal: padding *2),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(innerRadius)),
+      ),
+      progressIndicatorTheme: const ProgressIndicatorThemeData(
+        // ignore: deprecated_member_use
+        year2023: false,
+      ),
+      sliderTheme: const SliderThemeData(
+        // ignore: deprecated_member_use
+        year2023: false,
       ),
       snackBarTheme: const SnackBarThemeData(
         insetPadding: EdgeInsets.all(padding *2), // Margin around SnackBar // Combination with SnackBar width necessary
@@ -53,24 +64,33 @@ class CoreTheme {
       tooltipTheme: const TooltipThemeData(
         waitDuration: Duration(seconds: 1), // Delay for Web mouse hover
       ),
-      dataTableTheme: DataTableThemeData(
-        dataRowColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
-          if (states.contains(WidgetState.hovered)) return colorScheme.primary.withValues(alpha: 0.04);
-          return null;
-        }),
-        dataRowCursor: WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
-          return SystemMouseCursors.basic;
-        }),
-      ),
-      // ignore: deprecated_member_use
-      progressIndicatorTheme: ProgressIndicatorThemeData(year2023: false),
-      // ignore: deprecated_member_use
-      sliderTheme: SliderThemeData(year2023: false),
+
+      // dataTableTheme: DataTableThemeData(
+      //   dataRowColor: WidgetStateProperty<Color?>.fromMap(<WidgetStatesConstraint, Color?>{
+      //     WidgetState.hovered: colorScheme.primary.withValues(alpha: 0.04),
+      //     WidgetState.any: null,
+      //   }),
+      //   // dataRowColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+      //   //   if (states.contains(WidgetState.hovered)) return colorScheme.primary.withValues(alpha: 0.04);
+      //   //   return null;
+      //   // }),
+      //   dataRowCursor: WidgetStateProperty<MouseCursor>.fromMap(<WidgetStatesConstraint, MouseCursor>{
+      //     WidgetState.any: SystemMouseCursors.basic,
+      //   }),
+      //   // dataRowCursor: WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
+      //   //   return SystemMouseCursors.basic;
+      //   // }),
+      // ),
+      // iconTheme: IconThemeData(
+      //   // color: colorScheme.onSurfaceVariant, // Workaround for IconButtonThemeData not working in dark mode
+      //   weight: 500,
+      // ),
+
       visualDensity: VisualDensity.adaptivePlatformDensity,
     );
   }
 
-  final _lightColorScheme = const ColorScheme(
+  static const lightColorScheme = ColorScheme(
     brightness: Brightness.light,
     primary: Color(0xFF000000),
     surfaceTint: Color(0xFF5E5E5E),
@@ -120,7 +140,7 @@ class CoreTheme {
     surfaceContainerHighest: Color(0xFFDCDCDC), // surfaceContainerHigh -6
   );
 
-  final _darkColorScheme = const ColorScheme(
+  static const darkColorScheme = ColorScheme(
     brightness: Brightness.dark,
     primary: Color(0xFFC6C6C6),
     surfaceTint: Color(0xFFC6C6C6),

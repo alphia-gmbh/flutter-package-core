@@ -30,6 +30,9 @@ class CoreAppLocalizationsDe extends CoreAppLocalizations {
   String get buttonDownload => 'Herunterladen';
 
   @override
+  String get buttonDuplicate => 'Duplizieren';
+
+  @override
   String get buttonEditDate => 'Datum ändern';
 
   @override
@@ -42,6 +45,9 @@ class CoreAppLocalizationsDe extends CoreAppLocalizations {
   String get buttonOk => 'Ok';
 
   @override
+  String get buttonRemove => 'Entfernen';
+
+  @override
   String get buttonSave => 'Speichern';
 
   @override
@@ -52,6 +58,9 @@ class CoreAppLocalizationsDe extends CoreAppLocalizations {
 
   @override
   String get buttonUndo => 'Rückgängig';
+
+  @override
+  String get dialogTitleContinue => 'Weiter?';
 
   @override
   String get dialogTitleDelete => 'Löschen?';
@@ -74,6 +83,9 @@ class CoreAppLocalizationsDe extends CoreAppLocalizations {
   @override
   String get dialogContentOffline =>
       'Es scheint du bist offline. Bitte verbinde dich mit dem Internet und versuche es dann erneut.';
+
+  @override
+  String get dialogTitleRemove => 'Entfernen?';
 
   @override
   String get dialogTitleUploaded => 'Hochgeladen';
@@ -168,12 +180,10 @@ class CoreAppLocalizationsDe extends CoreAppLocalizations {
   String get subtitleAppVersion => 'App-Version';
 
   @override
-  String get copyright2023 =>
-      'Copyright 2023 Alphia GmbH.\nAll rights reserved.';
+  String get copyright2023 => 'Copyright 2023 Alphia GmbH';
 
   @override
-  String get copyright2024 =>
-      'Copyright 2024 Alphia GmbH.\nAll rights reserved.';
+  String get copyright2024 => 'Copyright 2024 Alphia GmbH';
 
   @override
   String get dialogTitleNoBrowser => 'Fehlender Browser';
@@ -220,19 +230,16 @@ class CoreAppLocalizationsDe extends CoreAppLocalizations {
 
   @override
   String snackAppCheckBlocked(String platform) {
-    String _temp0 = intl.Intl.selectLogic(
-      platform,
-      {
-        'ios':
-            'Sicherheit geht vor! Um maximalen Schutz zu gewährleisten, installiere ausschließlich aus dem Apple App Store',
-        'android':
-            'Sicherheit geht vor! Um maximalen Schutz zu gewährleisten, installiere ausschließlich aus dem Google Play Store',
-        'web':
-            'Dein Browser hat den Sicherheitstest nicht bestanden oder ist offline. Die Installation aus dem Apple App Store oder Google Play Store wird als Alternative empfohlen',
-        'other':
-            'Sicherheit geht vor! Um maximalen Schutz zu gewährleisten, installiere ausschließlich aus dem Apple App Store oder Google Play Store',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(platform, {
+      'ios':
+          'Sicherheit geht vor! Um maximalen Schutz zu gewährleisten, installiere ausschließlich aus dem Apple App Store',
+      'android':
+          'Sicherheit geht vor! Um maximalen Schutz zu gewährleisten, installiere ausschließlich aus dem Google Play Store',
+      'web':
+          'Dein Browser hat den Sicherheitstest nicht bestanden oder ist offline. Die Installation aus dem Apple App Store oder Google Play Store wird als Alternative empfohlen',
+      'other':
+          'Sicherheit geht vor! Um maximalen Schutz zu gewährleisten, installiere ausschließlich aus dem Apple App Store oder Google Play Store',
+    });
     return '$_temp0';
   }
 
@@ -242,16 +249,13 @@ class CoreAppLocalizationsDe extends CoreAppLocalizations {
 
   @override
   String snackSignInCanceled(String credentialProvider) {
-    String _temp0 = intl.Intl.selectLogic(
-      credentialProvider,
-      {
-        'apple': 'mit Apple ',
-        'google': 'mit Google ',
-        'microsoft': 'mit Microsoft ',
-        'anonymous': 'als Gast ',
-        'other': '',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(credentialProvider, {
+      'apple': 'mit Apple ',
+      'google': 'mit Google ',
+      'microsoft': 'mit Microsoft ',
+      'anonymous': 'als Gast ',
+      'other': '',
+    });
     return 'Bei der Anmeldung ${_temp0}ist etwas schiefgelaufen';
   }
 
@@ -271,8 +275,7 @@ class CoreAppLocalizationsDe extends CoreAppLocalizations {
   String get titleUpdatePersonal => 'Persönliche Daten aktualisieren';
 
   @override
-  String get subtitleUpdatePersonal =>
-      'Ändere deine Nutzerkonto E-Mail-Adresse';
+  String get subtitleUpdatePersonal => 'Ändere deine Anmeldemethode';
 
   @override
   String get appBarUpdatePersonal => 'Persönliche Daten aktualisieren';
@@ -299,7 +302,7 @@ class CoreAppLocalizationsDe extends CoreAppLocalizations {
 
   @override
   String get contentUpdatePersonalSecondStep =>
-      'Hier kannst du nun auswählen, wie du dich künftig anmelden möchtest, und deine aktualisierte E-Mail-Adresse angeben:';
+      'Hier kannst du nun auswählen, wie du dich künftig anmelden möchtest, und deinen aktualisierten Nutzernamen und E-Mail-Adresse angeben:';
 
   @override
   String contentUpdatePersonalSecondStepUnlink(String providerName) {
@@ -311,65 +314,45 @@ class CoreAppLocalizationsDe extends CoreAppLocalizations {
 
   @override
   String subtitleExportPersonal(String isAnonymous) {
-    String _temp0 = intl.Intl.selectLogic(
-      isAnonymous,
-      {
-        'true': 'App-Daten',
-        'other': 'Nutzerkontodaten',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(isAnonymous, {
+      'true': 'App-Daten',
+      'other': 'Nutzerkontodaten',
+    });
     return 'Exportiere deine $_temp0';
   }
 
   @override
-  String dialogContentExportPersonal(String isAnonymous, String email) {
-    String _temp0 = intl.Intl.selectLogic(
-      isAnonymous,
-      {
-        'true': '',
-        'other': ' ($email)',
-      },
-    );
-    return 'Eine Kopie deiner persönlichen Daten wird als ZIP-Archiv exportiert. Dein Archiv wird eine übersichtliche HTML-Datei enthalten und eine JSON-Datei für den möglichen Import in andere Tagebuch-Apps$_temp0.\n\nStelle sicher, dass du deine Dateien sicher aufbewahrst, besonders beim Speichern oder Teilen.';
-  }
+  String get dialogContentExportPersonal =>
+      'Eine Kopie deiner persönlichen Daten wird als ZIP-Archiv exportiert. Dein Archiv enthält eine übersichtliche HTML-Datei und eine JSON-Datei für den Import in andere Tagebuch-Apps.\n\nStelle bitte sicher, dass du deine Dateien sorgfältig aufbewahrst, besonders beim Speichern oder Teilen.';
 
   @override
   String get titleDeleteAccount => 'Persönliche Daten löschen';
 
   @override
   String subtitleDeleteAccount(String isAnonymous) {
-    String _temp0 = intl.Intl.selectLogic(
-      isAnonymous,
-      {
-        'true': 'deine App-Daten dauerhaft',
-        'other': 'dein Nutzerkonto dauerhaft',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(isAnonymous, {
+      'true': 'deine App-Daten dauerhaft',
+      'other': 'dein Nutzerkonto dauerhaft',
+    });
     return 'Lösche $_temp0';
   }
 
   @override
   String dialogContentDeleteAccount(String isAnonymous, String email) {
-    String _temp0 = intl.Intl.selectLogic(
-      isAnonymous,
-      {
-        'true': 'Alle deine persönlichen Daten werden dauerhaft gelöscht.',
-        'other':
-            'Dein Nutzerkonto inklusive aller deiner persönlichen Daten wird dauerhaft gelöscht ($email). Zudem wirst du von allen synchronisierten Geräten abgemeldet.\n\nVor der Löschung musst du dich eventuell nochmal anmelden, um zu verifizieren, dass es wirklich du bist.',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(isAnonymous, {
+      'true': 'Alle deine persönlichen Daten werden dauerhaft gelöscht.',
+      'other':
+          'Dein Nutzerkonto inklusive aller deiner persönlichen Daten wird dauerhaft gelöscht ($email). Zudem wirst du von allen synchronisierten Geräten abgemeldet.\n\nVor der Löschung musst du dich eventuell nochmal anmelden, um zu verifizieren, dass es wirklich du bist.',
+    });
     return '$_temp0';
   }
 
   @override
   String snackDeleteAccount(String isAnonymous) {
-    String _temp0 = intl.Intl.selectLogic(
-      isAnonymous,
-      {
-        'true': 'App-Daten',
-        'other': 'Nutzerkonto',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(isAnonymous, {
+      'true': 'App-Daten',
+      'other': 'Nutzerkonto',
+    });
     return '$_temp0 dauerhaft gelöscht';
   }
 
@@ -448,33 +431,57 @@ class CoreAppLocalizationsDe extends CoreAppLocalizations {
 
   @override
   String durationYearsAgo(
-      String hideYear, DateTime date, DateTime dateYear, DateTime time) {
+    String adposition,
+    String hideYear,
+    DateTime date,
+    DateTime dateYear,
+    DateTime time,
+  ) {
     final intl.DateFormat dateDateFormat = intl.DateFormat.MMMd(localeName);
     final String dateString = dateDateFormat.format(date);
-    final intl.DateFormat dateYearDateFormat =
-        intl.DateFormat.yMMMd(localeName);
+    final intl.DateFormat dateYearDateFormat = intl.DateFormat.yMMMd(
+      localeName,
+    );
     final String dateYearString = dateYearDateFormat.format(dateYear);
     final intl.DateFormat timeDateFormat = intl.DateFormat.Hm(localeName);
     final String timeString = timeDateFormat.format(time);
 
-    String _temp0 = intl.Intl.selectLogic(
-      hideYear,
-      {
-        'true': '$dateString $timeString',
-        'other': '$dateYearString $timeString',
-      },
-    );
-    return '$_temp0';
+    String _temp0 = intl.Intl.selectLogic(hideYear, {
+      'true': 'am $dateString $timeString',
+      'other': 'am $dateYearString $timeString',
+    });
+    String _temp1 = intl.Intl.selectLogic(hideYear, {
+      'true': '$dateString $timeString',
+      'other': '$dateYearString $timeString',
+    });
+    String _temp2 = intl.Intl.selectLogic(adposition, {
+      'true': '$_temp0',
+      'other': '$_temp1',
+    });
+    return '$_temp2';
   }
 
   @override
-  String doubleTwoDigits(double doubleTwoDigits) {
-    final intl.NumberFormat doubleTwoDigitsNumberFormat =
+  String doubleOneDigit(double double) {
+    final intl.NumberFormat doubleNumberFormat =
         intl.NumberFormat.decimalPatternDigits(
-            locale: localeName, decimalDigits: 2);
-    final String doubleTwoDigitsString =
-        doubleTwoDigitsNumberFormat.format(doubleTwoDigits);
+          locale: localeName,
+          decimalDigits: 1,
+        );
+    final String doubleString = doubleNumberFormat.format(double);
 
-    return '$doubleTwoDigitsString';
+    return '$doubleString';
+  }
+
+  @override
+  String doubleTwoDigits(double double) {
+    final intl.NumberFormat doubleNumberFormat =
+        intl.NumberFormat.decimalPatternDigits(
+          locale: localeName,
+          decimalDigits: 2,
+        );
+    final String doubleString = doubleNumberFormat.format(double);
+
+    return '$doubleString';
   }
 }

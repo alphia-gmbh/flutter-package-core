@@ -1,13 +1,12 @@
 // Copyright 2024 Alphia GmbH
 import 'package:flutter/cupertino.dart' show CupertinoActivityIndicator;
-import 'package:flutter/material.dart' show BuildContext, GlobalKey, NavigatorState, StatelessWidget, Widget, AlignmentGeometry, StackFit, Interval, Icon, VerticalDivider, Divider, Center, Alignment, Curves, Stack, AnimatedSwitcher, Icons, Theme, MaterialLocalizations, Navigator, IconButton, TargetPlatform, CircularProgressIndicator, SizedBox;
-import 'package:material_symbols_icons/symbols.dart' show Symbols;
-import 'crossplatform_io.dart' if (dart.library.js_interop) 'crossplatform_web.dart' show crossFirebaseCrashlyticsInstance, CorePlatform;
-export 'crossplatform_io.dart' if (dart.library.js_interop) 'crossplatform_web.dart' show CorePlatform;
-import 'l10n/app_localizations.dart' show CoreAppLocalizations;
-import 'service_auth.dart' show CoreUserNotifier, coreSignOutUser;
-import 'service_functions.dart' show coreShowSnackbar;
-import 'service_theme.dart' show CoreTheme;
+import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
+import 'crossplatform_io.dart' if (dart.library.js_interop) 'crossplatform_web.dart';
+import 'l10n/app_localizations.dart';
+import 'service_auth.dart';
+import 'service_functions.dart';
+import 'service_theme.dart';
 
 
 /// Provides core instances.
@@ -87,6 +86,71 @@ class CoreDivider extends StatelessWidget {
 }
 
 
+/// Provides core fade out animation widget. Slow out and fast in. Use with a [Listenable] and a [bool] to indicate if faded in or not.
+class CoreFadeOutAnimation extends StatefulWidget {
+  const CoreFadeOutAnimation({super.key, required this.child, required this.visible, this.alignment=Alignment.topCenter, this.hasInfiniteWidth=false});
+  final Widget child;
+  // final Listenable listenable;
+  final bool visible;
+  final AlignmentGeometry alignment;
+  final bool hasInfiniteWidth;
+  @override
+  State<CoreFadeOutAnimation> createState() => _CoreFadeOutAnimationState();
+}
+class _CoreFadeOutAnimationState extends State<CoreFadeOutAnimation> {
+  @override
+  Widget build(BuildContext context) {
+    // return ListenableBuilder(
+    //   listenable: widget.listenable,
+    //   builder: (BuildContext context, Widget? builderChild) {
+        return AnimatedCrossFade(
+          crossFadeState: widget.visible ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+          alignment: widget.alignment,
+          duration: CoreTheme.animationDuration,
+          firstCurve: const Interval(0, 0.35, curve: Curves.easeInCubic),
+          // secondCurve: // Not relevant for invisible SizedBox()
+          sizeCurve: const Interval(0.25, 0.75, curve: Curves.fastOutSlowIn),
+          firstChild: widget.child,
+          secondChild: SizedBox(width: widget.hasInfiniteWidth ? double.infinity : 0, height: 0, key: Key('shrink')),
+        );
+    //   },
+    // );
+  }
+}
+
+/// Provides core fade in animation widget. Slow in and fast out. Use with a [Listenable] and a [bool] to indicate if faded in or not.
+class CoreFadeInAnimation extends StatefulWidget {
+  const CoreFadeInAnimation({super.key, required this.child, required this.listenable, required this.visible, this.alignment=Alignment.topCenter, this.hasInfiniteWidth=false});
+  final Widget child;
+  final Listenable listenable;
+  final bool visible;
+  final AlignmentGeometry alignment;
+  final bool hasInfiniteWidth;
+  @override
+  State<CoreFadeInAnimation> createState() => _CoreFadeInAnimationState();
+}
+class _CoreFadeInAnimationState extends State<CoreFadeInAnimation> {
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: widget.listenable,
+      builder: (BuildContext context, Widget? builderChild) {
+        return AnimatedCrossFade(
+          crossFadeState: !widget.visible ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+          alignment: widget.alignment,
+          duration: CoreTheme.animationDuration,
+          // firstCurve: // Not relevant for invisible SizedBox()
+          secondCurve: const Interval(0.50, 1, curve: Curves.easeOutCubic),
+          sizeCurve: const Interval(0.25, 0.75, curve: Curves.fastOutSlowIn),
+          firstChild: SizedBox(width: widget.hasInfiniteWidth ? double.infinity : 0, height: 0, key: Key('shrink')),
+          secondChild: widget.child,
+        );
+      },
+    );
+  }
+}
+
+
 /// Provides core circular progress indicator widget. Adaptive to platform.
 class CoreProgressIndicator extends StatelessWidget {
   const CoreProgressIndicator({super.key});
@@ -129,12 +193,15 @@ class CoreSignOutButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      icon: const Icon(Symbols.logout_rounded),
-      tooltip: CoreInstance.text.buttonSignOut,
-      onPressed:  () {
-        coreSignOutUser().then((result) {if (result) coreShowSnackbar(content: CoreInstance.text.snackSignedOut, clearSnackbars: true);});
-      }
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: IconButton(
+        icon: const Icon(Symbols.logout_rounded),
+        tooltip: CoreInstance.text.buttonSignOut,
+        onPressed:  () {
+          coreSignOutUser().then((result) {if (result) coreShowSnackbar(content: CoreInstance.text.snackSignedOut, clearSnackbars: true);});
+        }
+      )
     );
   }
 }

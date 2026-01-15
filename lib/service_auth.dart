@@ -1,12 +1,12 @@
 // Copyright 2024 Alphia GmbH
-import 'package:cloud_functions/cloud_functions.dart' show FirebaseFunctions, HttpsCallableOptions;
-import 'package:firebase_auth/firebase_auth.dart' show AppleAuthProvider, FirebaseAuth, FirebaseAuthException, GoogleAuthProvider, MicrosoftAuthProvider, User, UserCredential;
-import 'package:flutter/foundation.dart' show kDebugMode;
-import 'package:flutter/material.dart' show ChangeNotifier, debugPrintStack;
-import 'package:flutter/services.dart' show PlatformException;
-import 'package:google_sign_in/google_sign_in.dart' show GoogleSignIn, GoogleSignInException, GoogleSignInAccount;
-import 'service_functions.dart' show CoreShowDialog, CoreShowSnackbar, coreShowSnackbar;
-import 'service_widgets.dart' show CoreInstance, CorePlatform;
+import 'package:cloud_functions/cloud_functions.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'crossplatform_io.dart' if (dart.library.js_interop) 'crossplatform_web.dart';
+import 'service_functions.dart';
+import 'service_widgets.dart';
 
 
 enum CoreCredProvider {apple, google, microsoft, anonymous}

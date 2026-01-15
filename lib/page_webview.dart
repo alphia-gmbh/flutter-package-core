@@ -1,12 +1,13 @@
 // Copyright 2024 Alphia GmbH
 import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
-import 'package:flutter/material.dart' show Alignment, AnimatedOpacity, AppBar, BuildContext, ChangeNotifier, Container, Curves, ListenableBuilder, Localizations, Navigator, SafeArea, Scaffold, Stack, State, StatefulWidget, Text, Theme, Widget;
-import 'package:flutter/services.dart' show PlatformException;
-import 'package:url_launcher/url_launcher.dart' show LaunchMode, launchUrl;
-import 'package:webview_flutter/webview_flutter.dart' show JavaScriptMode, NavigationDecision, NavigationDelegate, WebViewController, WebViewWidget;
-import 'service_functions.dart' show CoreShowDialog, coreShowDialog;
-import 'service_theme.dart' show CoreTheme;
-import 'service_widgets.dart' show CoreBackButton, CoreInstance, CorePlatform, CoreProgressIndicator;
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:webview_flutter/webview_flutter.dart';
+import 'crossplatform_io.dart' if (dart.library.js_interop) 'crossplatform_web.dart';
+import 'service_functions.dart';
+import 'service_theme.dart';
+import 'service_widgets.dart';
 
 
 /// Open [url] in internal webview if [appDomain] matches, otherwise open in external browser.
@@ -169,10 +170,12 @@ class _WebViewPageState extends State<WebViewPage> {
       // Handle errors
       onWebResourceError: (error) {
         if (mounted) webViewNotifier.hasError = true;
-        if ([-2, -1003, -1004, -1009].contains(error.errorCode)) { // Offline errors
+        if ([-2, -6, -1003, -1004, -1009, -1200].contains(error.errorCode)) { // Offline errors
+          // Android: -6 net::ERR_CONNECTION_REFUSED
+          // iOS: -1200 An SSL error has occurred and a secure connection to the server cannot be made.
           if (mounted) CoreShowDialog.offline().then((_) {if (mounted) Navigator.of(context).pop();});
         } else {
-          CoreInstance.crashlytics.recordError(error, null, reason: 'errorCode grain: ${error.errorCode} ${error.description}');
+          CoreInstance.crashlytics.recordError(error, null, reason: 'errorCode grain -- ${error.errorCode} -- ${error.description}');
         }
         return;
       },
