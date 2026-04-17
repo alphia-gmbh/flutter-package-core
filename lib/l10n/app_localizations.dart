@@ -298,7 +298,7 @@ abstract class CoreAppLocalizations {
   /// No description provided for @snackOffline.
   ///
   /// In en, this message translates to:
-  /// **'No internet'**
+  /// **'No internet connection'**
   String get snackOffline;
 
   /// No description provided for @snackSaved.

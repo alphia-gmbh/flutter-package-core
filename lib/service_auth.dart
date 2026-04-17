@@ -15,6 +15,12 @@ extension CoreCredProviderExtension on CoreCredProvider {
     return '${name[0].toUpperCase()}${name.substring(1)}';
   }
 }
+extension CoreCredProviderExtensionOnNull on CoreCredProvider? {
+  bool get isApple => this == CoreCredProvider.apple;
+  bool get isGoogle => this == CoreCredProvider.google;
+  bool get isMicrosoft => this == CoreCredProvider.microsoft;
+  bool get isAnonymous => this == CoreCredProvider.anonymous;
+}
 
 class CoreUserNotifier with ChangeNotifier {
   // Private properties
@@ -64,21 +70,9 @@ class CoreUserNotifier with ChangeNotifier {
     }
   }
   CoreCredProvider get providerId => getProviderId(_user);
-  String get providerName {
-    return '${providerId.name[0].toUpperCase()}${providerId.name.substring(1).split('.').first}';
-  }
+  String get providerName => providerId.nameCapitalized;
 }
 
-class _ShowSnackbar {
-  static void appCheckBlocked() {coreShowSnackbar(content: CoreInstance.text.snackAppCheckBlocked(CorePlatform.platform), isError: true); return;}
-  static void userMismatched(User? currUser) {coreShowSnackbar(content: '${CoreInstance.text.snackUserMismatched}\n${CoreUserNotifier.getDisplayName(currUser)}\n${CoreUserNotifier.getEmail(currUser)}', isError: true); return;}
-  static void signInCanceled({required CoreCredProvider? credentialProvider, required bool reauthenticate}) {
-    coreShowSnackbar(content: !reauthenticate
-      ? CoreInstance.text.snackSignInCanceled('${credentialProvider?.name}')
-      : CoreInstance.text.snackVerifyCanceled, isError: true);
-    return;
-  }
-}
 
 /// Sign in user with [credentialProvider] or handle signInWithRedirect redirect [credentialProvider==null]
 Future<bool> coreSignInUser([CoreCredProvider? credentialProvider]) async {
@@ -159,14 +153,13 @@ Future<bool> coreDeleteUser() async {
     switch (error.code) {
       case 'network-request-failed': {
         await CoreShowDialog.offline();
-        return false;
       }
       default: {
-        CoreInstance.crashlytics.recordError(error, stackTrace, reason: 'errorCode coast');
+        CoreInstance.crashlytics.recordError(error, stackTrace, reason: 'errorCode coast -- errorCode ${error.code} -- errorMessage ${error.message}');
         CoreShowSnackbar.genericError();
-        return false;
       }
     }
+    return false;
   }
 
   catch (error, stackTrace) {
@@ -190,7 +183,7 @@ Future<UserCredential?> coreAuthenticateUser({CoreCredProvider? credentialProvid
     // Split authentication flow by provider
     UserCredential? userCredential;
     /// Apple
-    if (credentialProvider == CoreCredProvider.apple) {
+    if (credentialProvider.isApple) {
       final appleProvider = AppleAuthProvider()..addScope('name')..addScope('email');
       if (!reauthenticate) { // sign-in
         if (!CorePlatform.isWeb) { // Android, iOS
@@ -210,7 +203,7 @@ Future<UserCredential?> coreAuthenticateUser({CoreCredProvider? credentialProvid
           .call({'code': userCredential.additionalUserInfo?.authorizationCode, 'token': userCredential.credential?.accessToken});
       }
     /// Google
-    } else if (credentialProvider == CoreCredProvider.google) {
+    } else if (credentialProvider.isGoogle) {
       if (!CorePlatform.isWeb) { // Android, iOS
         final googleSignIn = GoogleSignIn.instance;
         await googleSignIn.initialize();
@@ -219,9 +212,8 @@ Future<UserCredential?> coreAuthenticateUser({CoreCredProvider? credentialProvid
         try {
           googleSignInAccount = !reauthenticate ? await googleSignIn.authenticate(scopeHint: scopes) : await googleSignIn.attemptLightweightAuthentication();
           if (googleSignInAccount == null) throw 'googleSignInAccount == null';
-        } on GoogleSignInException catch (_) { // signInCanceled: iOS: Google // signInCanceled: Android: Google
-          _ShowSnackbar.signInCanceled(credentialProvider: credentialProvider, reauthenticate: reauthenticate); if (kDebugMode) debugPrintStack(label: '\nError "GoogleSignIn()" gracefully handled by:', maxFrames: 2);
-          return null;
+        } on GoogleSignInException catch (_) { // signInCanceled: Android: Google // signInCanceled: iOS: Google // offline: Android: Google
+          throw FirebaseAuthException(code: 'google-sign-in-exception');
         }
         final googleSignInAuthorization = await googleSignInAccount.authorizationClient.authorizationForScopes(scopes);
         final authCredential = GoogleAuthProvider.credential(accessToken: googleSignInAuthorization!.accessToken, idToken: googleSignInAccount.authentication.idToken);
@@ -240,7 +232,7 @@ Future<UserCredential?> coreAuthenticateUser({CoreCredProvider? credentialProvid
         }
       }
     /// Microsoft
-    } else if (credentialProvider == CoreCredProvider.microsoft) {
+    } else if (credentialProvider.isMicrosoft) {
       final microsoftProvider = MicrosoftAuthProvider(); // ..addScope('User.ReadBasic.All'); // ..addScope('user.read')..addScope('email');
       if (!reauthenticate) { // sign-in
         if (!CorePlatform.isWeb) { // Android, iOS
@@ -257,7 +249,7 @@ Future<UserCredential?> coreAuthenticateUser({CoreCredProvider? credentialProvid
         }
       }
     /// Anonymous
-    } else if (credentialProvider == CoreCredProvider.anonymous) {
+    } else if (credentialProvider.isAnonymous) {
       if (!CorePlatform.isWeb) { // Android, iOS
         userCredential = await FirebaseAuth.instance.signInAnonymously(); // If there is already an anonymous user signed in, that user will be returned instead.
       }
@@ -279,75 +271,60 @@ Future<UserCredential?> coreAuthenticateUser({CoreCredProvider? credentialProvid
 
   on FirebaseAuthException catch (error, stackTrace) {
     switch (error.code) {
+
+      case "network-request-failed" when ((CorePlatform.isAndroid && (credentialProvider.isGoogle || credentialProvider.isAnonymous)) || (CorePlatform.isIOS && credentialProvider.isAnonymous)): // offline: Android: Google, Guest // offline: iOS: Guest
+      case "unknown" when (CorePlatform.isAndroid && credentialProvider.isApple): { // appCheckBlocked: Android: Google, Guest // offline: Android: Apple
+        await CoreShowDialog.offline(); if (kDebugMode) {debugPrintStack(label: '\nError "${error.code}" gracefully handled by:', maxFrames: 2);}
+      }
+
+      case "internal-error" when (CorePlatform.isIOS || CorePlatform.isWeb): // appCheckBlocked: iOS: Apple, Google, Guest // appCheckBlocked: Web popup: Apple, Google // offline: iOS: Apple
+      case "unknown" when (CorePlatform.isAndroid && (credentialProvider.isGoogle || credentialProvider.isAnonymous)): // appCheckBlocked: Android: Google, Guest // offline: Android: Apple
+      case "web-internal-error" when (CorePlatform.isAndroid && credentialProvider.isApple): { // appCheckBlocked: Android: Apple
+        if (CorePlatform.isIOS && credentialProvider.isApple && !(await hasInternetConnection())) return null; // Workaround for iOS internal-error when offline
+        CoreInstance.crashlytics.recordError(error, stackTrace, reason: 'errorCode atrium -- errorCode ${error.code} -- errorMessage ${error.message} -- ${currUser == null} -- ${credentialProvider?.name}');
+        coreShowSnackbar(content: CoreInstance.text.snackAppCheckBlocked(CorePlatform.platform), isError: true); if (kDebugMode) {debugPrintStack(label: '\nError "${error.code}" gracefully handled by:', maxFrames: 2);}
+      }
+
+      case "canceled": // signInCanceled: iOS: Apple
+      case "google-sign-in-exception": // signInCanceled: Android: Google // signInCanceled: iOS: Google // offline: Android: Google
+      case "popup-closed-by-user": // signInCanceled: Web popup: Apple, Google
+      case "web-context-canceled": { // signInCanceled: Android: Apple
+        coreShowSnackbar(content: !reauthenticate ? CoreInstance.text.snackSignInCanceled('${credentialProvider?.name}') : CoreInstance.text.snackVerifyCanceled, isError: true); if (kDebugMode) {debugPrintStack(label: '\nError "${error.code}" gracefully handled by:', maxFrames: 2);}
+      }
+
       case "popup-blocked": {
         coreShowSnackbar(content: CoreInstance.text.snackPopupBlocked, isError: true);
-        return null;
+      }
+      case "user-mismatch": { // Case reauthenticating with different account // Works for Google and Apple
+        coreShowSnackbar(content: '${CoreInstance.text.snackUserMismatched}\n${CoreUserNotifier.getDisplayName(currUser)}\n${CoreUserNotifier.getEmail(currUser)}', isError: true);
       }
       case "web-context-already-presented": {
         coreShowSnackbar(content: CoreInstance.text.snackWebContext, isError: true);
-        return null;
       }
-      case "canceled": // signInCanceled: iOS: Apple
-      case "web-context-canceled": // signInCanceled: Android: Apple
-      case "popup-closed-by-user": { // signInCanceled: Web: Apple, Google
-        _ShowSnackbar.signInCanceled(credentialProvider: credentialProvider, reauthenticate: reauthenticate); if (kDebugMode) {debugPrintStack(label: '\nError "${error.code}" gracefully handled by:', maxFrames: 2);}
-        return null;
-      }
-      case "user-mismatch": { // Case reauthenticating with different account // Works for Google and Apple
-        _ShowSnackbar.userMismatched(currUser);
-        return null;
-      }
-      case "internal-error": // appCheckBlocked: iOS: Apple, Google, Guest // offline: Web: Apple, Google
-      case "web-internal-error": { // appCheckBlocked: Android: Apple
-        if (CorePlatform.isWeb) {
-          await CoreShowDialog.offline(); if (kDebugMode) {debugPrintStack(label: '\nError "${error.code}" gracefully handled by:', maxFrames: 2);}
-        }
-        else {
-          _ShowSnackbar.appCheckBlocked(); if (kDebugMode) {debugPrintStack(label: '\nError "${error.code}" gracefully handled by:', maxFrames: 2);}
-        }
-        return null;
-      }
-      case "unknown": {
-        if (CorePlatform.isAndroid && (credentialProvider == CoreCredProvider.apple)) { // offline: Android: Apple
-          await CoreShowDialog.offline(); if (kDebugMode) {debugPrintStack(label: '\nError "${error.code}" gracefully handled by:', maxFrames: 2);}
-        }
-        else { // appCheckBlocked: Android: Google, Guest // appCheckBlocked: Web: Apple, Google
-          _ShowSnackbar.appCheckBlocked(); if (kDebugMode) {debugPrintStack(label: '\nError "${error.code}" gracefully handled by:', maxFrames: 2);}
-        }
-        return null;
-      }
-      case "network-request-failed": {
-        if (CorePlatform.isWeb) { // appCheckBlocked: Web redirect: Apple
-          _ShowSnackbar.appCheckBlocked(); if (kDebugMode) {debugPrintStack(label: '\nError "${error.code}" gracefully handled by:', maxFrames: 2);}
-        } else { // offline: iOS: Guest // offline: Android: Guest
-          await CoreShowDialog.offline(); if (kDebugMode) {debugPrintStack(label: '\nError "${error.code}" gracefully handled by:', maxFrames: 2);}
-        }
-        return null;
-      }
+
       default: {
-        CoreInstance.crashlytics.recordError(error, stackTrace, reason: 'errorCode blanket -- ${currUser == null} -- ${credentialProvider?.name}');
+        CoreInstance.crashlytics.recordError(error, stackTrace, reason: 'errorCode blanket -- errorCode ${error.code} -- errorMessage ${error.message} -- ${currUser == null} -- ${credentialProvider?.name}');
         CoreShowSnackbar.genericError(); if (kDebugMode) {debugPrintStack(label: '\nError gracefully handled by:', maxFrames: 2);}
-        return null;
       }
     }
+    return null;
   }
 
   on PlatformException catch (error, stackTrace) {
     switch (error.code) {
-      case "network_error": { // offline: iOS: Google // offline: Android: Google // offline: Web: Google
-        await CoreShowDialog.offline();  if (kDebugMode) {debugPrintStack(label: '\nError "${error.code}" gracefully handled by:', maxFrames: 2);}
-        return null;
-      }
+          // case "network_error" when (credentialProvider.isGoogle): {
+          //   await CoreShowDialog.offline();  if (kDebugMode) {debugPrintStack(label: '\nError "${error.code}" gracefully handled by:', maxFrames: 2);}
+          // }
       case "status": { // googleSignIn.disconnect() error
+        CoreInstance.crashlytics.recordError(error, stackTrace, reason: 'errorCode curliness -- errorCode ${error.code} -- errorMessage ${error.message} -- errorDetails ${error.details} -- ${currUser == null} -- ${credentialProvider?.name}');
         CoreShowSnackbar.genericError();  if (kDebugMode) {debugPrintStack(label: '\nError "${error.code}" gracefully handled by:', maxFrames: 2);}
-        return null;
       }
       default: {
-        CoreInstance.crashlytics.recordError(error, stackTrace, reason: 'errorCode lava -- errorCode ${error.code} -- ${currUser == null} -- ${credentialProvider?.name}');
+        CoreInstance.crashlytics.recordError(error, stackTrace, reason: 'errorCode lava -- errorCode ${error.code} -- errorMessage ${error.message} -- errorDetails ${error.details} -- ${currUser == null} -- ${credentialProvider?.name}');
         CoreShowSnackbar.genericError(); if (kDebugMode) {debugPrintStack(label: '\nError gracefully handled by:', maxFrames: 2);}
-        return null;
       }
     }
+    return null;
   }
 
   catch (error, stackTrace) {

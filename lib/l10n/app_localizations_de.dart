@@ -106,7 +106,7 @@ class CoreAppLocalizationsDe extends CoreAppLocalizations {
   String get snackGenericError => 'Etwas ist schiefgelaufen';
 
   @override
-  String get snackOffline => 'Kein Internet';
+  String get snackOffline => 'Keine Internetverbindung';
 
   @override
   String get snackSaved => 'Gespeichert';

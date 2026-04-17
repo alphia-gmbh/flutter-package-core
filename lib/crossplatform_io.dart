@@ -16,3 +16,12 @@ class CorePlatform {
 
 // Workaround until Firebase Crashlytics supports web version
 final crossFirebaseCrashlyticsInstance = FirebaseCrashlytics.instance;
+
+Future<bool> hasInternetConnection() async {
+  try {
+    final result = await io.InternetAddress.lookup('firestore.googleapis.com');
+    return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+  } catch (_) {
+    return false;
+  }
+}

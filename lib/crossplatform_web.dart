@@ -18,3 +18,7 @@ class _FirebaseCrashlytics { // Do nothing on web version
   Future<void> setCrashlyticsCollectionEnabled(bool enable) async {}
   Future<void> setCustomKey(String key, Object value) async {}
 }
+
+Future<bool> hasInternetConnection() async {
+  return false;
+}

@@ -50,8 +50,11 @@ String coreCalcTimeAgo({required DateTime ago, DateTime? now, bool capitalized=f
 
 
 /// Show dialog with [title] and [content] and optional [leftButton] and required [rightButton]. [isError] changes color to errorContainer. [hasTimer] adds countdown timer to rightButton.
-Future<bool?> coreShowDialog({required String title, String? content, Widget? contentWidget, String? leftButton, required String rightButton, List<String>? buttonLabels, List<void Function()?>? buttonFunctions, bool isError=false, bool hasTimer=false}) {
+Future<bool?> coreShowDialog({String? title, Widget? titleWidget, String? content, Widget? contentWidget, String? leftButton, required String rightButton, List<String>? buttonLabels, List<void Function()?>? buttonFunctions, bool isError=false, bool hasTimer=false}) {
 
+  assert((title != null && titleWidget == null) || (title == null && titleWidget != null), 'errorCode turret');
+  assert((content == null && contentWidget == null) || (content != null && contentWidget == null) || (content == null && contentWidget != null), 'errorCode driveway');
+  assert((buttonLabels == null && buttonFunctions == null) || (buttonLabels != null && buttonFunctions != null && buttonLabels.length == buttonFunctions.length), 'errorCode quicksand');
   if (isError) HapticFeedback.lightImpact();
   final timerNotifier = ValueNotifier<int>(0);
   if (hasTimer) {
@@ -65,7 +68,8 @@ Future<bool?> coreShowDialog({required String title, String? content, Widget? co
       barrierDismissible: false,
       builder: (BuildContext context) {
         return CupertinoAlertDialog(
-          title: Text(title),
+          // title: Text(title),
+          title: titleWidget ?? ((title != null) ? Text(title) : null),
           content: contentWidget ?? ((content != null) ? Text(content) : null),
           actions: <Widget>[
             if (leftButton != null)
@@ -114,7 +118,7 @@ Future<bool?> coreShowDialog({required String title, String? content, Widget? co
                 constraints: BoxConstraints(minHeight: viewportConstraints.maxHeight),
                 child: AlertDialog(
                   insetPadding: const EdgeInsets.all(CoreTheme.padding*2), // Margin around AlertDialog
-                  title: Text(title),
+                  title: titleWidget ?? ((title != null) ? Text(title) : null),
                   content: ConstrainedBox( // ConstrainedBox necessary to limit maxWidth, CupertinoAlertDialog is limited by default
                     constraints: const BoxConstraints(maxWidth: CoreTheme.maxWidth - 48 - (CoreTheme.padding *2)), // AlertDialog default content padding 48
                     child: contentWidget ?? ((content != null) ? Text(content) : null),

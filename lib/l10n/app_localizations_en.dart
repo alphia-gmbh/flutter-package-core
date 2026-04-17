@@ -106,7 +106,7 @@ class CoreAppLocalizationsEn extends CoreAppLocalizations {
   String get snackGenericError => 'Something didn’t go as planned';
 
   @override
-  String get snackOffline => 'No internet';
+  String get snackOffline => 'No internet connection';
 
   @override
   String get snackSaved => 'Saved';
